@@ -3,7 +3,7 @@ import logging
 
 from rich.console import RenderableType
 
-from textual import events
+from textual import events, on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, Grid
 from textual.screen import Screen
@@ -134,9 +134,7 @@ class ScanningScreen(Screen):
         except AttributeError:
             pass
 
-    def on_screen_resume(self, event: ScreenResume) -> None:
-        self._start_scanning()
-
+    @on(ScreenResume)
     def _start_scanning(self,):
 
         def scan_cb(scan_data):
@@ -184,11 +182,13 @@ class QuitScreen(Screen):
             id="quitdialog",
         )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "quit":
-            self.app.do_exit()
-        else:
-            self.app.pop_screen()
+    @on(Button.Pressed, "#quit")
+    def quit(self):
+        self.app.do_exit()
+
+    @on(Button.Pressed, "#cancel")
+    def cancel(self):
+        self.app.pop_screen()
 
 class ConsoleLogStream:
     def __init__(self, log_cb) -> None:
@@ -233,7 +233,8 @@ class MainScreen(Screen):
         self.disconnect_all_devices()
         self.app.push_screen("scan")
 
-    def on_screen_resume(self, event: ScreenResume) -> None:
+    @on(ScreenResume)
+    def update_device_info(self):
         self.app.logger.debug(f"Using the following devices: [{self.app.left_device}, {self.app.right_device}]")
         self.query_one('#deviceleft').device_info = self.app.left_device
         self.query_one('#deviceright').device_info = self.app.right_device

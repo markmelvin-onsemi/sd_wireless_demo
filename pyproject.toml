@@ -30,7 +30,7 @@ wireless_demo = "wireless_demo.main:run"
 python = "^3.7"
 sd-sdk-python = ">=0.2.0"
 #sd-sdk-python = {path="../sd-sdk-python", develop=true}
-textual = {extras = ["dev"], version = "^0.23.0"}
+textual = {extras = ["dev"], version = "^0.24.0"}
 
 [build-system]
 requires = ["poetry-core"]

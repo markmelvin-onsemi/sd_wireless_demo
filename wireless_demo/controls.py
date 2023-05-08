@@ -5,7 +5,7 @@ from rich.progress import Progress, BarColumn, TextColumn, TaskProgressColumn
 from textual.widget import Widget
 from textual.widgets import Static, Label, LoadingIndicator
 from textual.reactive import reactive
-from textual import events
+from textual import events, on
 from textual.message import Message
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Container
@@ -335,7 +335,8 @@ class HearingAidControlPanel(Widget):
             except:
                 pass
 
-    def on_hearing_aid_control_panel_device_disconnected_event(self, sdk_event: HearingAidControlPanel.DeviceDisconnectedEvent) -> None:
+    @on(DeviceDisconnectedEvent)
+    def device_disconnected(self):
         if self.device_info is not None:
             self.app.logger.info(f"Device disconnected: ({self.device_info})")
             self.app.mount(Notification(f"{self.device_info['DeviceID']} disconnected"))
