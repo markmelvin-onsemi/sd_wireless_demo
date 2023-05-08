@@ -19,7 +19,7 @@ from textual.widgets import (
     Button,
 )
 from textual.events import ScreenResume
-from textual.message import Message, MessageTarget
+from textual.message import Message
 
 from wireless_demo.demo_sd_sdk import SDKHelper, sd
 from wireless_demo.controls import TooltipEvent, HearingAidControlPanels, HearingAidControlPanel

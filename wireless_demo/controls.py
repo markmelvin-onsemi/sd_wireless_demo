@@ -3,15 +3,13 @@ from __future__ import annotations
 
 from rich.progress import Progress, BarColumn, TextColumn, TaskProgressColumn
 from textual.widget import Widget
-from textual.widgets import Static
+from textual.widgets import Static, Label, LoadingIndicator
 from textual.reactive import reactive
 from textual import events
-from textual.message import Message, MessageTarget
-from textual.app import ComposeResult, RenderResult
+from textual.message import Message
+from textual.app import ComposeResult
 from textual.containers import Horizontal, Container
 
-from rich.spinner import Spinner
-from rich.status import Status
 from rich.pretty import Pretty
 
 import asyncio
@@ -20,37 +18,23 @@ import functools
 
 from wireless_demo.demo_sd_sdk import sd
 
+
+class LoadingWidget(Widget):
+    def __init__(self, label):
+        super().__init__()
+        self.label = label
+
+    def compose(self) -> ComposeResult:
+        yield Label(self.label)
+        yield LoadingIndicator()
+
+
 class Notification(Static):
     def on_mount(self) -> None:
         self.set_timer(3, self.remove)
 
     def on_click(self) -> None:
         self.remove()
-
-
-# See: https://github.com/Textualize/rich/issues/2665
-class SpinnerWidget(Static):
-    def __init__(self):
-        super().__init__("")
-        self._spinner = Spinner("moon")
-
-    def on_mount(self) -> None:
-        self.update_render = self.set_interval(1 / 60, self.update_spinner)
-
-    def update_spinner(self) -> None:
-        self.update(self._spinner)
-
-
-class StatusWidget(Static):
-    def __init__(self, status, spinner : str | None = 'dots'):
-        super().__init__("")
-        self._status = Status(status, spinner=spinner)
-
-    def on_mount(self) -> None:
-        self.update_render = self.set_interval(1 / 60, self.update_status)
-
-    def update_status(self) -> None:
-        self.update(self._status)
 
 
 class TooltipEvent(Message):
@@ -312,7 +296,7 @@ class HearingAidControlPanel(Widget):
     def watch_device_info(self, _old: dict, _new: dict) -> None:
         if _old is None and _new is not None:
             self.display = True
-            self.mount(StatusWidget(f"Connecting to {self.device_info['DeviceID']}"))
+            self.mount(LoadingWidget(f"Connecting to '{self.device_info['DeviceName']}' ({self.device_info['DeviceID']})..."))
             asyncio.create_task(self.connect_device())
 
         elif _new is None:
@@ -324,7 +308,7 @@ class HearingAidControlPanel(Widget):
     def watch_connected_device(self, _old: dict, _new: dict) -> None:
         if _new is not None:
             self.app.logger.info(f"Connected: ({self.device_info})")
-            self.query_one(StatusWidget).remove()
+            self.query_one(LoadingWidget).remove()
             self.connected_device.on_event = self.on_sdk_event
             # Change UI to show wireless control panel
             self.mount(HearingAidWirelessControl(self.connected_device))
