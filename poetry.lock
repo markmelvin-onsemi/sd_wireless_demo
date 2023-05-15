@@ -239,7 +239,7 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "sd-sdk-python"
-version = "0.2.0"
+version = "0.2.2"
 description = "Python helper module for the Sound Designer SDK"
 category = "main"
 optional = false
@@ -312,7 +312,7 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "6f0c5f8d92eba97e967ee5fb878fa9998efca627b0abc30287eae2c2958c2782"
+content-hash = "1f7c458682b1c87f2ad31f464973d90bd5962c2a93364a8a6cd296c28d82c5af"
 
 [metadata.files]
 aiohttp = [
@@ -755,8 +755,8 @@ rich = [
     {file = "rich-13.3.5.tar.gz", hash = "sha256:2d11b9b8dd03868f09b4fffadc84a6a8cda574e40dc90821bd845720ebb8e89c"},
 ]
 sd-sdk-python = [
-    {file = "sd_sdk_python-0.2.0-py3-none-any.whl", hash = "sha256:2862c600d4b52111437b87dd2b768c9e4f45e8da9a94e710567443f0a10c86eb"},
-    {file = "sd_sdk_python-0.2.0.tar.gz", hash = "sha256:d3a28681e3b14511e80b24f23967009368833e30b984c1f074c23468d9f2a5a6"},
+    {file = "sd_sdk_python-0.2.2-py3-none-any.whl", hash = "sha256:f3d41f1244bf158ed946f355c2dd52d724dbae2187fb3ca0619be0018f5e0c23"},
+    {file = "sd_sdk_python-0.2.2.tar.gz", hash = "sha256:e9ad5ebda8bbe8bb009f460856d0488107c09e7afb8b2d054b4856907fcdce45"},
 ]
 textual = [
     {file = "textual-0.24.1-py3-none-any.whl", hash = "sha256:a7deb7ac5a1502424c754fe165ae13cb3890e47ddc514d3f089cb2984c336d1d"},

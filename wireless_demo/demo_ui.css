@@ -168,7 +168,7 @@ DeviceInformation {
     dock: bottom;
     text-opacity: 25%;
     border: round;
-    height: 20;
+    height: 26;
     transition: height 500ms in_out_cubic;
 }
 

@@ -61,6 +61,15 @@ class DeviceInformation(HasDevice):
     def compose(self,) -> ComposeResult:
         yield Toggle()
         yield Static(Pretty(self.device.device_info.to_dict()))
+        yield Static("[bold underline]Device Information Service (DIS)[/]")
+        dis = {
+            "Manufacturer Name" : self.device.wireless_control.ManufacturerName,
+            "Model Number" : self.device.wireless_control.ModelNumber,
+            "Serial Number" : self.device.wireless_control.SerialNumber,
+            # TODO: Uncomment when SWMSIXTY-2743 is fixed
+            # "Hardware Revision" : self.device.wireless_control.HardwareRevision,
+        }
+        yield Static(Pretty(dis))
 
     def on_mount(self,) -> None:
         self.query_one(Toggle).collapsed = True
@@ -200,8 +209,6 @@ class MemoryPanel(HasDevice):
         elif event.button == 2:
             memory = int(self.id.split("memoryindicator")[1])
             self.device.wireless_control.CurrentMemory = memory
-            # No notification when memory is manually set? Force a refresh.
-            self.post_message_no_wait(self.MemorySetEvent(self, memory))
         elif event.button == 3:
             self.device.wireless_control.ChangeMemory(True)
 
@@ -221,7 +228,7 @@ class MemoryControl(HasDevice):
         self.num_memories = self.device.wireless_control.NumberOfMemories
         for mem in range(self.num_memories):
             s = MemoryPanel(self.device, content=f"{mem}", id=f"memoryindicator{mem}", classes="memoryindicator")
-            if not self.device.wireless_control.MemoryEnabled:
+            if not self.device.wireless_control.MemoryEnabled(mem):
                 s.add_class("disabled")
             memories.append(s)
 

@@ -268,8 +268,8 @@ class DemoApp(App[None]):
 
         # See if we're being run by `textual run --dev`
         if 'devtools' in self.features:
-            # self.cmdline_args = Args('RSL10', 'COM7', False, True, None)
-            self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"))
+            self.cmdline_args = Args('RSL10', 'COM7', False, True, None)
+            # self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"))
 
         self.logger = logging.getLogger("DemoApp")
         # Avoid all output being sent to the console as well
