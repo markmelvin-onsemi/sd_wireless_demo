@@ -223,14 +223,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "rich"
-version = "13.3.5"
+version = "13.4.2"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 category = "main"
 optional = false
 python-versions = ">=3.7.0"
 
 [package.dependencies]
-markdown-it-py = ">=2.2.0,<3.0.0"
+markdown-it-py = ">=2.2.0"
 pygments = ">=2.13.0,<3.0.0"
 typing-extensions = {version = ">=4.0.0,<5.0", markers = "python_version < \"3.9\""}
 
@@ -239,15 +239,20 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "sd-sdk-python"
-version = "0.2.2"
+version = "0.2.5"
 description = "Python helper module for the Sound Designer SDK"
 category = "main"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = "^3.7"
+develop = true
+
+[package.source]
+type = "directory"
+url = "../sd-sdk-python"
 
 [[package]]
 name = "textual"
-version = "0.24.1"
+version = "0.27.0"
 description = "Modern Text User Interface framework"
 category = "main"
 optional = false
@@ -267,7 +272,7 @@ dev = ["aiohttp (>=3.8.1)", "click (>=8.1.2)", "msgpack (>=1.0.3)"]
 
 [[package]]
 name = "typing-extensions"
-version = "4.5.0"
+version = "4.6.3"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
@@ -312,7 +317,7 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1f7c458682b1c87f2ad31f464973d90bd5962c2a93364a8a6cd296c28d82c5af"
+content-hash = "21a4fbd121087107fec19ae13bb1cb2e4225756116ebf7ac050e7aea62fedc4c"
 
 [metadata.files]
 aiohttp = [
@@ -751,20 +756,17 @@ pygments = [
     {file = "Pygments-2.15.1.tar.gz", hash = "sha256:8ace4d3c1dd481894b2005f560ead0f9f19ee64fe983366be1a21e171d12775c"},
 ]
 rich = [
-    {file = "rich-13.3.5-py3-none-any.whl", hash = "sha256:69cdf53799e63f38b95b9bf9c875f8c90e78dd62b2f00c13a911c7a3b9fa4704"},
-    {file = "rich-13.3.5.tar.gz", hash = "sha256:2d11b9b8dd03868f09b4fffadc84a6a8cda574e40dc90821bd845720ebb8e89c"},
+    {file = "rich-13.4.2-py3-none-any.whl", hash = "sha256:8f87bc7ee54675732fa66a05ebfe489e27264caeeff3728c945d25971b6485ec"},
+    {file = "rich-13.4.2.tar.gz", hash = "sha256:d653d6bccede5844304c605d5aac802c7cf9621efd700b46c7ec2b51ea914898"},
 ]
-sd-sdk-python = [
-    {file = "sd_sdk_python-0.2.2-py3-none-any.whl", hash = "sha256:f3d41f1244bf158ed946f355c2dd52d724dbae2187fb3ca0619be0018f5e0c23"},
-    {file = "sd_sdk_python-0.2.2.tar.gz", hash = "sha256:e9ad5ebda8bbe8bb009f460856d0488107c09e7afb8b2d054b4856907fcdce45"},
-]
+sd-sdk-python = []
 textual = [
-    {file = "textual-0.24.1-py3-none-any.whl", hash = "sha256:a7deb7ac5a1502424c754fe165ae13cb3890e47ddc514d3f089cb2984c336d1d"},
-    {file = "textual-0.24.1.tar.gz", hash = "sha256:4c7e1f4ed12b9615c63fa3eb7cb9df68d29e0ae5b2352997958cd7ee5533f926"},
+    {file = "textual-0.27.0-py3-none-any.whl", hash = "sha256:dc45eaf7da330686c56d6f76f59d05fd216ce6aad90fa44ee269881efc622151"},
+    {file = "textual-0.27.0.tar.gz", hash = "sha256:8bdcb09dc35a706ef939b1276ccfdec10eaaee6147b41cb7587cf33298a8dd33"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-4.5.0-py3-none-any.whl", hash = "sha256:fb33085c39dd998ac16d1431ebc293a8b3eedd00fd4a32de0ff79002c19511b4"},
-    {file = "typing_extensions-4.5.0.tar.gz", hash = "sha256:5cb5f4a79139d699607b3ef622a1dedafa84e115ab0024e0d9c044a9479ca7cb"},
+    {file = "typing_extensions-4.6.3-py3-none-any.whl", hash = "sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26"},
+    {file = "typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},
 ]
 uc-micro-py = [
     {file = "uc-micro-py-1.0.2.tar.gz", hash = "sha256:30ae2ac9c49f39ac6dce743bd187fcd2b574b16ca095fa74cd9396795c954c54"},

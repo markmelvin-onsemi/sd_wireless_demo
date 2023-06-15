@@ -22,20 +22,18 @@ from textual.events import ScreenResume
 from textual.message import Message
 
 from wireless_demo.demo_sd_sdk import SDKHelper, sd
-from wireless_demo.controls import TooltipEvent, HearingAidControlPanels, HearingAidControlPanel
+from wireless_demo.controls import HearingAidControlPanels, HearingAidControlPanel
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 _title = "Pre Suite Wireless Demo"
 
 
 class Version(Static):
-    tooltip:str = reactive("")
 
     def render(self) -> RenderableType:
-        if self.tooltip is not None and len(self.tooltip):
-            return f"[b]{self.tooltip}"
         return f"[b]v{__version__}"
+
 
 class Body(Container):
     pass
@@ -71,13 +69,6 @@ class ScanResultDisplay(ListItem):
         mac_addr1 = int(mac_str[0:6], 16)
         mac_addr2 = int(mac_str[6:], 16)
         return (mac_addr1, mac_addr2)
-
-    def on_enter(self, event: events.Enter):
-        part1, part2 = self.get_integer_mac_addresses()
-        self.post_message(TooltipEvent(f"MAC Part 1: {part1}, MAC Part 2: {part2}"))
-
-    def on_leave(self, event: events.Leave):
-        self.post_message(TooltipEvent(""))
 
 
 class ScanResultsListViews(Widget):
@@ -131,6 +122,8 @@ class ScanningScreen(Screen):
             new_result = ScanResultDisplay(message.scan_data)
             self.query_one(_id).mount(new_result)
             new_result.scroll_visible()
+            part1, part2 = new_result.get_integer_mac_addresses()
+            new_result.tooltip = f"MAC Part 1: {part1}\nMAC Part 2: {part2}"
         except AttributeError:
             pass
 
@@ -169,9 +162,6 @@ class ScanningScreen(Screen):
         devices = [w for w in [self.app.left_device, self.app.right_device] if w is not None]
         self.query_one(SelectedScanItems).total = len(devices)
 
-    def on_tooltip_event(self, event: TooltipEvent) -> None:
-        self.query_one(Version).tooltip = event.tooltip
-
 
 class QuitScreen(Screen):
     def compose(self) -> ComposeResult:
@@ -202,14 +192,14 @@ class MainScreen(Screen):
     TITLE = _title
     BINDINGS = [
         ("ctrl+s", "enter_scan_mode", "Scan For Devices"),
-        ("f1", "app.toggle_class('TextLog', '-hidden')", "Show Log"),
+        # ("f1", "app.toggle_class('TextLog', '-hidden')", "Show Log"),
         ("ctrl+q", "request_quit", "Quit"),
     ]
 
     def compose(self) -> ComposeResult:
         yield Container(
             Header(show_clock=True),
-            TextLog(id="consolelog", classes="-hidden", wrap=False, highlight=True, markup=True),
+            # TextLog(id="consolelog", classes="-hidden", wrap=False, highlight=True, markup=True),
             Body(
                 HearingAidControlPanels(),
                 Version(),
@@ -243,9 +233,6 @@ class MainScreen(Screen):
         for q in self.query(HearingAidControlPanel):
             q.disconnect_device()
 
-    def on_tooltip_event(self, event: TooltipEvent) -> None:
-        self.query_one(Version).tooltip = event.tooltip
-
 
 from dataclasses import dataclass
 import pathlib
@@ -268,8 +255,8 @@ class DemoApp(App[None]):
 
         # See if we're being run by `textual run --dev`
         if 'devtools' in self.features:
-            self.cmdline_args = Args('RSL10', 'COM7', False, True, None)
-            # self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"))
+            # self.cmdline_args = Args('RSL10', 'COM7', False, True, None)
+            self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"))
 
         self.logger = logging.getLogger("DemoApp")
         # Avoid all output being sent to the console as well

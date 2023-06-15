@@ -1,9 +1,8 @@
 
 from __future__ import annotations
 
-from rich.progress import Progress, BarColumn, TextColumn, TaskProgressColumn
 from textual.widget import Widget
-from textual.widgets import Static, Label, LoadingIndicator
+from textual.widgets import Static, Label, LoadingIndicator, ProgressBar
 from textual.reactive import reactive
 from textual import events, on
 from textual.message import Message
@@ -37,11 +36,6 @@ class Notification(Static):
         self.remove()
 
 
-class TooltipEvent(Message):
-    def __init__(self, tooltip: str) -> None:
-        self.tooltip = tooltip
-        super().__init__()
-
 class HasDevice(Static):
     def __init__(self, connected_device, content="", **kwargs):
         super().__init__(content, **kwargs)
@@ -66,8 +60,7 @@ class DeviceInformation(HasDevice):
             "Manufacturer Name" : self.device.wireless_control.ManufacturerName,
             "Model Number" : self.device.wireless_control.ModelNumber,
             "Serial Number" : self.device.wireless_control.SerialNumber,
-            # TODO: Uncomment when SWMSIXTY-2743 is fixed
-            # "Hardware Revision" : self.device.wireless_control.HardwareRevision,
+            "Hardware Revision" : self.device.wireless_control.HardwareRevision,
         }
         yield Static(Pretty(dis))
 
@@ -87,36 +80,34 @@ class DeviceInformation(HasDevice):
 class BatteryIndicator(HasDevice):
     level = reactive(0)
 
+    def compose(self) -> ComposeResult:
+        with Horizontal(classes="level-indicator"):
+            yield Label("       :battery:")
+            yield ProgressBar(total=100, show_eta=False)
+
     def on_mount(self) -> None:
-        self.rich_progress = Progress(
-                                        TextColumn("[progress.description]:battery:"),
-                                        BarColumn(),
-                                        TaskProgressColumn(),
-                                        auto_refresh=False,
-                                     )
-        self.rich_task = self.rich_progress.add_task("level", total=100)
         self.level = self.device.wireless_control.BatteryLevel
-        self.update(self.rich_progress)
 
     def watch_level(self, new_level: int):
-        self.rich_progress.update(self.rich_task, completed=new_level, refresh=True)
+        self.query_one(ProgressBar).progress = new_level
 
 class VolumeControl(HasDevice):
     volume = reactive(0)
 
+    def compose(self) -> ComposeResult:
+        with Horizontal(classes="level-indicator"):
+            yield Label("Volume   ")
+            yield ProgressBar(total=100, show_eta=False)
+
     def on_mount(self) -> None:
-        self.rich_progress = Progress(
-                                        TextColumn("[progress.description]Volume"),
-                                        BarColumn(),
-                                        TaskProgressColumn(),
-                                        auto_refresh=False,
-                                     )
-        self.rich_task = self.rich_progress.add_task("volume", total=100)
         self.volume = self.device.wireless_control.Volume
-        self.update(self.rich_progress)
+        # Workaround for bug in Tooltips on compound widgets
+        for part in self.query_one(ProgressBar).query("*"):
+            part.tooltip = "Left-click: Volume Down\nMiddle-click: Volume 50%\nRight-click: Volume Up"
+        # self.query_one(ProgressBar).tooltip = "Left-click: Volume Down\nMiddle-click: Volume 50%\nRight-click: Volume Up"
 
     def watch_volume(self, new_volume: int):
-        self.rich_progress.update(self.rich_task, completed=new_volume, refresh=True)
+        self.query_one(ProgressBar).progress = new_volume
 
     def on_click(self,  event: events.Click) -> None:
         if event.button == 1:
@@ -126,29 +117,24 @@ class VolumeControl(HasDevice):
         elif event.button == 3:
             self.device.wireless_control.ChangeVolume(True)
 
-    def on_enter(self, event: events.Enter):
-        self.post_message(TooltipEvent("Left-click: Volume Down, Middle-click: Volume 50%, Right-click: Volume Up"))
-
-    def on_leave(self, event: events.Leave):
-        self.post_message(TooltipEvent(""))
-
 
 class MicAttenuation(HasDevice):
     atten = reactive(0)
 
+    def compose(self) -> ComposeResult:
+        with Horizontal(classes="level-indicator"):
+            yield Label("Mic Level")
+            yield ProgressBar(total=100, show_eta=False)
+
     def on_mount(self) -> None:
-        self.rich_progress = Progress(
-                                        TextColumn("[progress.description]Mic Level"),
-                                        BarColumn(),
-                                        TaskProgressColumn(),
-                                        auto_refresh=False,
-                                     )
-        self.rich_task = self.rich_progress.add_task("atten", total=100)
         self.atten = self.device.wireless_control.MicAttenuation
-        self.update(self.rich_progress)
+        # Workaround for bug in Tooltips on compound widgets
+        for part in self.query_one(ProgressBar).query("*"):
+            part.tooltip = "Left-click: -5%\nMiddle-click: 50%\nRight-click: +5%"
+        # self.query_one(ProgressBar).tooltip = "Left-click: -5%\nMiddle-click: 50%\nRight-click: +5%"
 
     def watch_atten(self, new_atten: int):
-        self.rich_progress.update(self.rich_task, completed=new_atten, refresh=True)
+        self.query_one(ProgressBar).progress = new_atten
 
     def on_click(self,  event: events.Click) -> None:
         if event.button == 1:
@@ -158,29 +144,24 @@ class MicAttenuation(HasDevice):
         elif event.button == 3:
             self.device.wireless_control.MicAttenuation = min(100, self.atten + 5)
 
-    def on_enter(self, event: events.Enter):
-        self.post_message(TooltipEvent("Left-click: -5%, Middle-click: 50%, Right-click: +5%"))
-
-    def on_leave(self, event: events.Leave):
-        self.post_message(TooltipEvent(""))
-
 
 class AuxAttenuation(HasDevice):
     atten = reactive(0)
 
+    def compose(self) -> ComposeResult:
+        with Horizontal(classes="level-indicator"):
+            yield Label("Aux Level")
+            yield ProgressBar(total=100, show_eta=False)
+
     def on_mount(self) -> None:
-        self.rich_progress = Progress(
-                                        TextColumn("[progress.description]Aux Level"),
-                                        BarColumn(),
-                                        TaskProgressColumn(),
-                                        auto_refresh=False,
-                                     )
-        self.rich_task = self.rich_progress.add_task("atten", total=100)
         self.atten = self.device.wireless_control.AuxAttenuation
-        self.update(self.rich_progress)
+        # Workaround for bug in Tooltips on compound widgets
+        for part in self.query_one(ProgressBar).query("*"):
+            part.tooltip = "Left-click: -5%\nMiddle-click: 50%\nRight-click: +5%"
+        # self.query_one(ProgressBar).tooltip = "Left-click: -5%\nMiddle-click: 50%\nRight-click: +5%"
 
     def watch_atten(self, new_atten: int):
-        self.rich_progress.update(self.rich_task, completed=new_atten, refresh=True)
+        self.query_one(ProgressBar).progress = new_atten
 
     def on_click(self,  event: events.Click) -> None:
         if event.button == 1:
@@ -189,12 +170,6 @@ class AuxAttenuation(HasDevice):
             self.device.wireless_control.AuxAttenuation = 50
         elif event.button == 3:
             self.device.wireless_control.AuxAttenuation = min(100, self.atten + 5)
-
-    def on_enter(self, event: events.Enter):
-        self.post_message(TooltipEvent("Left-click: -5%, Middle-click: 50%, Right-click: +5%"))
-
-    def on_leave(self, event: events.Leave):
-        self.post_message(TooltipEvent(""))
 
 
 class MemoryPanel(HasDevice):
@@ -212,12 +187,6 @@ class MemoryPanel(HasDevice):
         elif event.button == 3:
             self.device.wireless_control.ChangeMemory(True)
 
-    def on_enter(self, event: events.Enter):
-        self.post_message(TooltipEvent("Left-click: Memory Down, Middle-click: Memory Set, Right-click:Memory Up"))
-
-    def on_leave(self, event: events.Leave):
-        self.post_message(TooltipEvent(""))
-
 
 class MemoryControl(HasDevice):
     memory = reactive(0)
@@ -231,8 +200,9 @@ class MemoryControl(HasDevice):
             if not self.device.wireless_control.MemoryEnabled(mem):
                 s.add_class("disabled")
             memories.append(s)
+            s.tooltip = "Left-click: Memory Down\nMiddle-click: Memory Set\nRight-click:Memory Up"
 
-        yield Static("Current Memory", classes="currentmemory")
+        yield Static("Memory", classes="currentmemory")
         yield Horizontal(*memories)
 
     def on_mount(self) -> None:
@@ -250,8 +220,31 @@ class MemoryControl(HasDevice):
         if self.memory != event.memory:
             self.app.logger.info(f"ERROR: Current memory {self.memory} did not match expected {event.memory}!")
 
+
+class ECMemory(Widget):
+    memory = reactive("-1", layout=True)  
+
+    def render(self) -> str:
+        return f"{self.memory}"
+
+
+class ECMemoryControl(HasDevice):
+    ec_memory = reactive(0)
+
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield Label("EC Memory:")
+            yield ECMemory()
+
+    def on_mount(self) -> None:
+        self.ec_memory = self.device.wireless_control.ECMemory
+
+    def watch_ec_memory(self, new_ec_memory: int):
+        self.query_one(ECMemory).memory = new_ec_memory
+
+
 class HearingAidWirelessControl(Widget):
-    def __init__(self, connected_device):
+    def __init__(self, connected_device) -> None:
         super().__init__()
         self.device = connected_device
 
@@ -262,6 +255,7 @@ class HearingAidWirelessControl(Widget):
             MicAttenuation(self.device),
             AuxAttenuation(self.device),
             MemoryControl(self.device),
+            ECMemoryControl(self.device),
             DeviceInformation(self.device),
         )
 
@@ -278,6 +272,8 @@ class HearingAidWirelessControl(Widget):
             self.query_one(AuxAttenuation).atten = int(sdk_event.event_data["AuxLevel"])
         elif sdk_event.event_type == sd.kMemoryEvent:
             self.query_one(MemoryControl).memory = int(sdk_event.event_data["CurrentMemory"])
+        elif sdk_event.event_type == sd.kECMemoryEvent:
+            self.query_one(ECMemoryControl).ec_memory = int(sdk_event.event_data["ECMemory"])
         else:
             self.app.logger.info(f"Got event type {sdk_event.event_type} with data {sdk_event.event_data}")
         # Avoid event bubbling back up to parent widget
@@ -355,9 +351,7 @@ class HearingAidControlPanel(Widget):
 
 class HearingAidControlPanels(Widget):
     def compose(self) -> ComposeResult:
-        yield Container(
-            Horizontal (
-                HearingAidControlPanel(id="deviceleft"),
-                HearingAidControlPanel(id="deviceright"),
-            ),
-        )
+        with Container():
+            with Horizontal ():
+                yield HearingAidControlPanel(id="deviceleft")
+                yield HearingAidControlPanel(id="deviceright")

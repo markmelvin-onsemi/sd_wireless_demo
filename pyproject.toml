@@ -28,9 +28,9 @@ wireless_demo = "wireless_demo.main:run"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-sd-sdk-python = ">=0.2.2"
-#sd-sdk-python = {path="../sd-sdk-python", develop=true}
-textual = {extras = ["dev"], version = "^0.24.0"}
+#sd-sdk-python = ">=0.2.4"
+sd-sdk-python = {path="../sd-sdk-python", develop=true}
+textual = {extras = ["dev"], version = "^0.27.0"}
 
 [build-system]
 requires = ["poetry-core"]
