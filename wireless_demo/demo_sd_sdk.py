@@ -3,6 +3,7 @@
 #       line arguments in main.py. Ensure you always run that script
 #       as the entry point to the system.
 from sd_sdk_python import sd, get_product_manager
+from sd_sdk_python.sd_sdk import Ezairo
 from sd_sdk_python.sd_sdk_wireless import ScanResultHandler, connect_to_device
 
 
@@ -42,3 +43,14 @@ class SDKHelper(object):
                                  timeout=timeout,
                                  event_cb=event_cb)
 
+    def create_product(self, com_adaptor, product_library):
+        library = self.pm.LoadLibraryFromFile(str(product_library))
+        product = library.Products[0].CreateProduct()
+        device_info = com_adaptor.DetectDevice()
+        assert device_info is not None
+        assert device_info.IsValid
+
+        if not product.InitializeDevice(com_adaptor):
+            raise RuntimeError("Product is not configured with that product library!")
+        ezairo = Ezairo(sd, com_adaptor, device_info, product)
+        return ezairo

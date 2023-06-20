@@ -17,6 +17,8 @@ def parse_command_line_arguments():
                         help='Log additional debug information to app_debug.log')
     parser.add_argument('--delete-bonds', action='store_true', default=False,
                         help='Delete the bond table in the wireless programmer')
+    parser.add_argument('--library-path', type=pathlib.Path, default=None,
+                        help='Path to the product library to load and use (optional)')
 
     args = parser.parse_args()
     if args.sdk_root is not None:
@@ -25,6 +27,10 @@ def parse_command_line_arguments():
     if args.programmer.upper() == 'NOAHLINK':
         assert args.noahlink_driver_path is not None, "Path to the NOAHLink wireless drivers was not set!"
         assert args.noahlink_driver_path.exists() and args.noahlink_driver_path.is_dir(), "Invalid NOAHLink Wireless driver path!"
+
+    # This is not supported yet
+    if args.library_path is not None:
+        raise NotImplementedError()
 
     return args
 

@@ -7,7 +7,7 @@ from textual.reactive import reactive
 from textual import events, on
 from textual.message import Message
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Container
+from textual.containers import Horizontal, Vertical, Container
 
 from rich.pretty import Pretty
 
@@ -243,6 +243,45 @@ class ECMemoryControl(HasDevice):
         self.query_one(ECMemory).memory = new_ec_memory
 
 
+class ProductPanel(HasDevice):
+
+    def compose(self) -> ComposeResult:
+        with Horizontal():
+            yield Label("Product library loaded!")
+
+
+class SDKControlPanel(Widget):
+    ezairo: reactive[object | None] = reactive(None)
+
+    def __init__(self, connected_device) -> None:
+        super().__init__()
+        self.device = connected_device
+
+    def watch_ezairo(self, _old: object, _new: object) -> None:
+        if _new is not None:
+            self.query_one(LoadingWidget).remove()
+            # Change UI to show SDK UI
+            self.mount(ProductPanel(self.ezairo))
+        else:
+            # TODO
+            pass
+
+    def on_mount(self) -> None:
+        if self.app.product_library is not None:
+            self.mount(LoadingWidget(f"Reading device parameters..."))
+            asyncio.create_task(self.sync_with_device())
+        else:
+            self.display = False
+
+    async def sync_with_device(self,) -> None:
+        loop = asyncio.get_running_loop()
+        self.ezairo = await loop.run_in_executor(None,
+                                        functools.partial(self.app.sdk.create_product,
+                                                          self.device.com_adaptor,
+                                                          self.app.product_library))
+
+
+
 class HearingAidWirelessControl(Widget):
     def __init__(self, connected_device) -> None:
         super().__init__()
@@ -256,6 +295,7 @@ class HearingAidWirelessControl(Widget):
             AuxAttenuation(self.device),
             MemoryControl(self.device),
             ECMemoryControl(self.device),
+            SDKControlPanel(self.device),
             DeviceInformation(self.device),
         )
 
@@ -308,7 +348,7 @@ class HearingAidControlPanel(Widget):
                 self.connected_device = None
             self.display = False
 
-    def watch_connected_device(self, _old: dict, _new: dict) -> None:
+    def watch_connected_device(self, _old: object, _new: object) -> None:
         if _new is not None:
             self.app.logger.info(f"Connected: ({self.device_info})")
             self.query_one(LoadingWidget).remove()

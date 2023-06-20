@@ -192,14 +192,14 @@ class MainScreen(Screen):
     TITLE = _title
     BINDINGS = [
         ("ctrl+s", "enter_scan_mode", "Scan For Devices"),
-        # ("f1", "app.toggle_class('TextLog', '-hidden')", "Show Log"),
+        ("f1", "app.toggle_class('TextLog', '-hidden')", "Show Log"),
         ("ctrl+q", "request_quit", "Quit"),
     ]
 
     def compose(self) -> ComposeResult:
         yield Container(
             Header(show_clock=True),
-            # TextLog(id="consolelog", classes="-hidden", wrap=False, highlight=True, markup=True),
+            TextLog(id="consolelog", classes="-hidden", wrap=False, highlight=True, markup=True),
             Body(
                 HearingAidControlPanels(),
                 Version(),
@@ -244,6 +244,7 @@ class Args:
     delete_bonds:bool
     debug:bool
     noahlink_driver_path:object
+    library_path:object
 
 class DemoApp(App[None]):
     CSS_PATH = "demo_ui.css"
@@ -255,8 +256,8 @@ class DemoApp(App[None]):
 
         # See if we're being run by `textual run --dev`
         if 'devtools' in self.features:
-            # self.cmdline_args = Args('RSL10', 'COM7', False, True, None)
-            self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"))
+            # self.cmdline_args = Args('RSL10', 'COM7', False, True, None, None)
+            self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"), pathlib.Path("C:\\_dev\\PreSuite\\SoundDesignerSDK\\products\\E7160SL.library"))
 
         self.logger = logging.getLogger("DemoApp")
         # Avoid all output being sent to the console as well
@@ -275,6 +276,13 @@ class DemoApp(App[None]):
                              com_port=self.cmdline_args.com_port,
                              clear_bond_table=self.cmdline_args.delete_bonds,
                              noah_driver_path=self.cmdline_args.noahlink_driver_path)
+
+        self.product_library = None
+        if self.cmdline_args.library_path is not None and \
+                            self.cmdline_args.library_path.exists() and \
+                                                self.cmdline_args.library_path.is_file():
+            self.product_library = self.cmdline_args.library_path
+
 
     def on_mount(self) -> None:
         self.push_screen("main")

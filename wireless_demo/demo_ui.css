@@ -59,10 +59,6 @@ Screen > Container {
     padding: 0 1 1 1;
 }
 
-#consolelog:focus {
-    offset: 0 0 !important;
-}
-
 #consolelog.-hidden {
     offset-y: 100%;
 }
