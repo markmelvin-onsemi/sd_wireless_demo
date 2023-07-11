@@ -28,10 +28,6 @@ def parse_command_line_arguments():
         assert args.noahlink_driver_path is not None, "Path to the NOAHLink wireless drivers was not set!"
         assert args.noahlink_driver_path.exists() and args.noahlink_driver_path.is_dir(), "Invalid NOAHLink Wireless driver path!"
 
-    # This is not supported yet
-    if args.library_path is not None:
-        raise NotImplementedError()
-
     return args
 
 def run():

@@ -143,13 +143,13 @@ class ScanningScreen(Screen):
         self.app.sdk.stop_scanning()
         self.app.logger.debug(f"Device scan stopped.")
 
-    def action_exit_scan_mode(self) -> None:
+    async def action_exit_scan_mode(self) -> None:
         self._stop_scanning()
-        self.app.query(ScanResultDisplay).remove()
+        await self.app.query(ScanResultDisplay).remove()
         self.app.pop_screen()
 
-    def action_clear_scan_lists(self) -> None:
-        self.app.query(ScanResultDisplay).remove()
+    async def action_clear_scan_lists(self) -> None:
+        await self.app.query(ScanResultDisplay).remove()
         self._stop_scanning()
         self._start_scanning()
 
@@ -256,8 +256,8 @@ class DemoApp(App[None]):
 
         # See if we're being run by `textual run --dev`
         if 'devtools' in self.features:
-            # self.cmdline_args = Args('RSL10', 'COM7', False, True, None, None)
-            self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"), pathlib.Path("C:\\_dev\\PreSuite\\SoundDesignerSDK\\products\\E7160SL.library"))
+            self.cmdline_args = Args('RSL10', 'COM7', False, True, None, pathlib.Path("C:\\_dev\\PreSuite\\SoundDesignerSDK\\products\\E7160SL.library"))
+            # self.cmdline_args = Args('NOAHLink', '', False, True, pathlib.Path("c:\\Users\\ffwxyx\\.sounddesigner\\nlw\\"), pathlib.Path("C:\\_dev\\PreSuite\\SoundDesignerSDK\\products\\E7160SL.library"))
 
         self.logger = logging.getLogger("DemoApp")
         # Avoid all output being sent to the console as well

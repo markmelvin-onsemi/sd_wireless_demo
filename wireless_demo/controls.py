@@ -11,8 +11,8 @@ from textual.containers import Horizontal, Vertical, Container
 
 from rich.pretty import Pretty
 
-import asyncio
-import functools
+from textual import work
+from textual.worker import get_current_worker
 
 
 from wireless_demo.demo_sd_sdk import sd
@@ -32,8 +32,8 @@ class Notification(Static):
     def on_mount(self) -> None:
         self.set_timer(3, self.remove)
 
-    def on_click(self) -> None:
-        self.remove()
+    async def on_click(self) -> None:
+        await self.remove()
 
 
 class HasDevice(Static):
@@ -247,7 +247,7 @@ class ProductPanel(HasDevice):
 
     def compose(self) -> ComposeResult:
         with Horizontal():
-            yield Label("Product library loaded!")
+            yield Label("Product library loaded.\nTODO: Something useful")
 
 
 class SDKControlPanel(Widget):
@@ -257,29 +257,36 @@ class SDKControlPanel(Widget):
         super().__init__()
         self.device = connected_device
 
-    def watch_ezairo(self, _old: object, _new: object) -> None:
-        if _new is not None:
-            self.query_one(LoadingWidget).remove()
-            # Change UI to show SDK UI
-            self.mount(ProductPanel(self.ezairo))
+    def compose(self) -> ComposeResult:
+        if self.app.product_library is not None:
+            yield LoadingWidget(f"Reading device parameters...")
         else:
-            # TODO
-            pass
+            yield Label("")
 
     def on_mount(self) -> None:
         if self.app.product_library is not None:
-            self.mount(LoadingWidget(f"Reading device parameters..."))
-            asyncio.create_task(self.sync_with_device())
+            self.sync_with_device()
         else:
             self.display = False
 
-    async def sync_with_device(self,) -> None:
-        loop = asyncio.get_running_loop()
-        self.ezairo = await loop.run_in_executor(None,
-                                        functools.partial(self.app.sdk.create_product,
-                                                          self.device.com_adaptor,
-                                                          self.app.product_library))
+    def watch_ezairo(self, _old: object, _new: object) -> None:
+        if _new is not None:
+            self.call_after_refresh(self.show_product_panel)
 
+    async def show_product_panel(self,) -> None:
+        await self.query_one(LoadingWidget).remove()
+        # Change UI to show SDK UI
+        self.call_after_refresh(self.mount, ProductPanel(self.ezairo))
+
+    @work(exclusive=True)
+    def sync_with_device(self,) -> None:
+        worker = get_current_worker()
+        _res = self.app.sdk.create_product(self.device.com_adaptor,
+                                           self.app.product_library)
+        if not worker.is_cancelled:
+            def _update_reactive(new_value):
+                self.ezairo = new_value
+            self.app.call_from_thread(_update_reactive, _res)
 
 
 class HearingAidWirelessControl(Widget):
@@ -340,7 +347,7 @@ class HearingAidControlPanel(Widget):
         if _old is None and _new is not None:
             self.display = True
             self.mount(LoadingWidget(f"Connecting to '{self.device_info['DeviceName']}' ({self.device_info['DeviceID']})..."))
-            asyncio.create_task(self.connect_device())
+            self.connect_device()
 
         elif _new is None:
             if self.connected_device:
@@ -348,13 +355,19 @@ class HearingAidControlPanel(Widget):
                 self.connected_device = None
             self.display = False
 
+    @work(exclusive=True)
+    def connect_device(self,) -> None:
+        worker = get_current_worker()
+        _res = self.app.sdk.connect_device(self.device_info)
+        if not worker.is_cancelled:
+            def _update_reactive(new_value):
+                self.connected_device = new_value
+            self.app.call_from_thread(_update_reactive, _res)
+
     def watch_connected_device(self, _old: object, _new: object) -> None:
         if _new is not None:
             self.app.logger.info(f"Connected: ({self.device_info})")
-            self.query_one(LoadingWidget).remove()
-            self.connected_device.on_event = self.on_sdk_event
-            # Change UI to show wireless control panel
-            self.mount(HearingAidWirelessControl(self.connected_device))
+            self.call_later(self.show_control_panel)
         else:
             try:
                 self.query_one(HearingAidWirelessControl).remove()
@@ -362,11 +375,11 @@ class HearingAidControlPanel(Widget):
                 pass
             self.app.logger.debug("Device disconnected")
 
-    async def connect_device(self,) -> None:
-        loop = asyncio.get_running_loop()
-        self.connected_device = await loop.run_in_executor(None,
-                                        functools.partial(self.app.sdk.connect_device,
-                                                          self.device_info))
+    async def show_control_panel(self,) -> None:
+        await self.query_one(LoadingWidget).remove()
+        self.connected_device.on_event = self.on_sdk_event
+        # Change UI to show wireless control panel
+        self.call_after_refresh(self.mount, HearingAidWirelessControl(self.connected_device))
 
     def on_sdk_event(self, event_type, event_data):
         if event_type == sd.kConnectionEvent and int(event_data["ConnectionState"]) in [sd.kDisconnected, sd.kDisconnecting]:

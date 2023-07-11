@@ -4,7 +4,7 @@
 
 Screen {
     layers: base overlay notifications;
-    overflow: hidden;  
+    overflow: hidden;
 }
 
 Notification {
@@ -21,7 +21,7 @@ Notification {
 
 Body {
     height: 100%;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
     width: 100%;
     background: $surface;
 
@@ -145,7 +145,7 @@ HearingAidWirelessControl {
 }
 
 MemoryControl {
-    border: round lightseagreen;
+    border: round darkgreen;
     height: 6;
 }
 
@@ -173,11 +173,19 @@ ECMemoryControl {
     /* padding-top: 1; */
     /* padding-bottom: 1; */
     /* background: $panel; */
+    padding-left: 1;
     height: 1;
 }
 
 ECMemory {
     padding-left: 2;
+}
+
+SDKControlPanel {
+    padding: 0;
+    height: 60%;
+    /* background: $panel; */
+    border: round darkgreen;
 }
 
 DeviceInformation {

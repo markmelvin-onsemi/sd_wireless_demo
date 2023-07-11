@@ -42,8 +42,8 @@ class SDKHelper(object):
                                  self.programmer_type,
                                  timeout=timeout,
                                  event_cb=event_cb)
-
-    def create_product(self, com_adaptor, product_library):
+ 
+    def create_product(self, com_adaptor, product_library) -> Ezairo:
         library = self.pm.LoadLibraryFromFile(str(product_library))
         product = library.Products[0].CreateProduct()
         device_info = com_adaptor.DetectDevice()
@@ -52,5 +52,4 @@ class SDKHelper(object):
 
         if not product.InitializeDevice(com_adaptor):
             raise RuntimeError("Product is not configured with that product library!")
-        ezairo = Ezairo(sd, com_adaptor, device_info, product)
-        return ezairo
+        return Ezairo(sd, com_adaptor, device_info, product)
