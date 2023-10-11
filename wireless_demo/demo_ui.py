@@ -24,7 +24,7 @@ from textual.message import Message
 from wireless_demo.demo_sd_sdk import SDKHelper, sd
 from wireless_demo.controls import HearingAidControlPanels, HearingAidControlPanel
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 _title = "Pre Suite Wireless Demo"
 
