@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sd-wireless-demo"
-version = "0.2.2"
+version = "0.2.3"
 description = "Wireless demo using the Sound Designer SDK on Windows"
 authors = ["Mark Melvin <mark.melvin@onsemi.com>"]
 readme = "README.md"
